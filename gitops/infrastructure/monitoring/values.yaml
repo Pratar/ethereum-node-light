@@ -1,0 +1,21 @@
+---
+grafana:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+
+prometheus:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+
+alertmanager:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+
+serviceMonitorSelector: {}
+serviceMonitorNamespaceSelector: {}

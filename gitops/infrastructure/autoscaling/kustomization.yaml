@@ -1,0 +1,19 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - vpa-crds.yaml
+  - vpa-deployment.yaml
+  - vpa-rbac.yaml
+  - vpa-webhook.yaml
+  - vpa-service.yaml
+  - ethereum-vpa.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/component: ethereum-infrastructure
+      app.kubernetes.io/instance: base
+      app.kubernetes.io/name: ethereum-node
+      app.kubernetes.io/version: v1.0.0 

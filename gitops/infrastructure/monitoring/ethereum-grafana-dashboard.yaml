@@ -1,0 +1,186 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ethereum-node-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  ethereum-node-dashboard.json: |-
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Ethereum Node Dashboard",
+        "tags": ["ethereum", "blockchain"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Ethereum Node Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "up{app=\"ethereum-node\"}",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "CPU Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(process_cpu_seconds_total{app=\"ethereum-node\"}[5m]) * 100",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "CPU %",
+                "min": 0,
+                "max": 100
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "process_resident_memory_bytes{app=\"ethereum-node\"} / 1024 / 1024",
+                "legendFormat": "{{instance}} MB"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Memory MB"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Disk Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "(container_fs_usage_bytes{app=\"ethereum-node\"} / container_fs_capacity_bytes{app=\"ethereum-node\"}) * 100",
+                "legendFormat": "{{instance}} %"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Disk %",
+                "min": 0,
+                "max": 100
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 5,
+            "title": "Network Connections",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "ethereum_eth_p2p_connections{app=\"ethereum-node\"}",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Connections"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 6,
+            "title": "RPC Requests",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{app=\"ethereum-node\"}[5m])",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Requests/sec"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          },
+          {
+            "id": 7,
+            "title": "Block Height",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "ethereum_eth_block_height{app=\"ethereum-node\"}",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "yAxes": [
+              {
+                "label": "Block Height"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+          },
+          {
+            "id": 8,
+            "title": "Sync Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "ethereum_eth_syncing{app=\"ethereum-node\"}",
+                "legendFormat": "{{instance}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "red", "value": 1}
+                  ]
+                },
+                "mappings": [
+                  {"options": {"0": {"text": "Synced"}}, "type": "value"},
+                  {"options": {"1": {"text": "Syncing"}}, "type": "value"}
+                ]
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }

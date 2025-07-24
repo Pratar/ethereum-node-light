@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ethereum
+  labels:
+    name: ethereum
+    app: ethereum-node

@@ -1,0 +1,57 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ethereum-node-network-policy
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: ethereum-node
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ethereum
+      ports:
+        - protocol: TCP
+          port: 8545
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ethereum
+      ports:
+        - protocol: TCP
+          port: 30303
+        - protocol: UDP
+          port: 30303
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 6060
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 30303
+        - protocol: UDP
+          port: 30303 

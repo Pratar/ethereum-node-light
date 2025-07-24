@@ -1,0 +1,43 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: ethereum-node-dev
+  annotations:
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/environment: dev
+
+resources:
+  - ../../base
+
+patches:
+  - path: replicas-patch.yaml
+    target:
+      kind: StatefulSet
+      name: ethereum-node
+  - path: resources-patch.yaml
+    target:
+      kind: StatefulSet
+      name: ethereum-node
+
+configMapGenerator:
+  - name: ethereum-config
+    literals:
+      - environment=dev
+      - log-level=debug
+      - max-peers=5
+
+secretGenerator:
+  - name: ethereum-secrets
+    literals:
+      - rpc-password=dev-password
+      - p2p-key=dev-key
+
+commonLabels:
+  app.kubernetes.io/environment: dev
+  environment: development
+
+commonAnnotations:
+  environment: development
+  cost-center: development

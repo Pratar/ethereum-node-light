@@ -1,0 +1,23 @@
+---
+apiVersion: policy.cert-manager.io/v1alpha1
+kind: CertificateRequestPolicy
+metadata:
+  name: ethereum-cert-policy
+spec:
+  allowed:
+    namespaces:
+      - ethereum
+      - monitoring
+    issuers:
+      - name: selfsigned-issuer
+        kind: ClusterIssuer
+        group: cert-manager.io
+    subject:
+      organizations:
+        - Ethereum
+      commonNames:
+        - "*.ethereum.example.com"
+        - "*.monitoring.example.com"
+  denied:
+    commonNames:
+      - "forbidden.example.com"

@@ -1,0 +1,50 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ethereum-vs
+  namespace: istio-system
+spec:
+  hosts:
+    - "ethereum.example.com"
+  gateways:
+    - ethereum-gateway
+  http:
+    - route:
+        - destination:
+            host: ethereum-node.ethereum.svc.cluster.local
+            port:
+              number: 8545
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grafana-vs
+  namespace: istio-system
+spec:
+  hosts:
+    - "grafana.example.com"
+  gateways:
+    - ethereum-gateway
+  http:
+    - route:
+        - destination:
+            host: grafana.monitoring.svc.cluster.local
+            port:
+              number: 3000
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus-vs
+  namespace: istio-system
+spec:
+  hosts:
+    - "prometheus.example.com"
+  gateways:
+    - ethereum-gateway
+  http:
+    - route:
+        - destination:
+            host: prometheus.monitoring.svc.cluster.local
+            port:
+              number: 9090 

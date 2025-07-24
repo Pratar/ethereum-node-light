@@ -1,0 +1,29 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  annotations:
+    app.kubernetes.io/name: ethereum-infrastructure
+    app.kubernetes.io/version: v1.0.0
+  name: ethereum-infrastructure
+
+resources:
+  - namespaces.yaml
+  - storage/
+  - autoscaling/
+  - ingress/
+  - sealed-secrets/
+  - cert-manager/
+  - monitoring/
+
+commonAnnotations:
+  kustomize.config.k8s.io/needs-hash-suffix: "true"
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/component: ethereum-infrastructure
+      app.kubernetes.io/instance: infrastructure
+      app.kubernetes.io/name: ethereum-node
+      app.kubernetes.io/version: v1.0.0

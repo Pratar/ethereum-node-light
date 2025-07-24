@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-gateway-controller
+  namespace: istio-system
+  labels:
+    app: istio-gateway-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: istio-gateway-controller
+  template:
+    metadata:
+      labels:
+        app: istio-gateway-controller
+    spec:
+      serviceAccountName: istio-gateway-controller
+      containers:
+        - name: controller
+          image: istio/pilot:1.20.0
+          command:
+            - pilot-discovery
+          args:
+            - discovery
+            - --monitoringAddr=:8080
+            - --log_output_level=default:info
+            - --domain
+            - cluster.local
+            - --enable-gateway-api
+            - --gateway-api-controller-name=istio.io/gateway-controller
+          ports:
+            - containerPort: 8080
+              name: metrics
+          env:
+            - name: PILOT_CERT_PROVIDER
+              value: istiod
+            - name: PILOT_ENABLE_GATEWAY_API
+              value: "true"
+            - name: PILOT_GATEWAY_API_CONTROLLER_NAME
+              value: "istio.io/gateway-controller"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-gateway-controller
+  namespace: istio-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istio-gateway-controller
+rules:
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources: ["gateways", "gatewayclasses", "httproutes"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["services", "endpoints", "pods", "nodes", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.istio.io"]
+    resources: ["gateways", "virtualservices"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-gateway-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-gateway-controller
+subjects:
+  - kind: ServiceAccount
+    name: istio-gateway-controller
+    namespace: istio-system 

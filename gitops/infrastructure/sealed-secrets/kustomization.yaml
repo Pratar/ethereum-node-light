@@ -1,0 +1,12 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - sealed-secrets-namespace.yaml
+  - sealed-secrets-crds.yaml
+  - sealed-secrets-deployment.yaml
+  - sealed-secrets-service.yaml
+  - sealed-secrets-serviceaccount.yaml
+  - sealed-secrets-webhook.yaml
+  - sealed-secrets-rbac.yaml

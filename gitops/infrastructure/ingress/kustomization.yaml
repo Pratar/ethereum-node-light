@@ -1,0 +1,20 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ethereum-ingress.yaml
+  - frontend-config.yaml
+  - managed-cert.yaml
+  - grafana-ingress.yaml
+
+commonAnnotations:
+  kustomize.config.k8s.io/needs-hash-suffix: "true"
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/component: ethereum-infrastructure
+      app.kubernetes.io/instance: base
+      app.kubernetes.io/name: ethereum-node
+      app.kubernetes.io/version: v1.0.0 

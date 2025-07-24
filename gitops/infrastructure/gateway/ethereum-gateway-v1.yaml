@@ -1,0 +1,20 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: ethereum-gateway
+  namespace: ethereum
+  labels:
+    app.kubernetes.io/component: ethereum-infrastructure
+    app.kubernetes.io/instance: base
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+spec:
+  gatewayClassName: istio
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All 

@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ethereum-ingress
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    app.kubernetes.io/component: ethereum-workload
+    app.kubernetes.io/instance: workload
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "ethereum-external-ip"
+spec:
+  rules:
+  - host: ethereum.example.com
+    http:
+      paths:
+      - path: /rpc
+        pathType: Prefix
+        backend:
+          service:
+            name: ethereum-node
+            port:
+              number: 8545
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: ethereum-node
+            port:
+              number: 6060
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ethereum-node
+            port:
+              number: 8545 

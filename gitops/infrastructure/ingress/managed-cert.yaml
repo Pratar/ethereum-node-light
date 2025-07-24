@@ -1,0 +1,14 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: ethereum-managed-cert
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    app.kubernetes.io/component: ethereum-workload
+    app.kubernetes.io/instance: workload
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+spec:
+  domains:
+  - ethereum.example.com 

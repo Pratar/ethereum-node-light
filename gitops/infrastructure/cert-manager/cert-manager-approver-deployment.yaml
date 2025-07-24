@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-approver-policy
+  namespace: cert-manager
+  labels:
+    app: cert-manager-approver-policy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-manager-approver-policy
+  template:
+    metadata:
+      labels:
+        app: cert-manager-approver-policy
+    spec:
+      serviceAccountName: cert-manager
+      containers:
+        - name: approver-policy
+          image: quay.io/jetstack/cert-manager-approver-policy:v0.8.0
+          args:
+            - --log-level=2
+            - --leader-election-namespace=cert-manager
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

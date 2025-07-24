@@ -1,0 +1,30 @@
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: ethereum-node-vpa
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    app.kubernetes.io/component: ethereum-infrastructure
+    app.kubernetes.io/instance: base
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: StatefulSet
+    name: ethereum-node
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        minAllowed:
+          cpu: 100m
+          memory: 512Mi
+        maxAllowed:
+          cpu: "4"
+          memory: 8Gi
+        controlledResources: ["cpu", "memory"]
+        controlledValues: RequestsAndLimits 

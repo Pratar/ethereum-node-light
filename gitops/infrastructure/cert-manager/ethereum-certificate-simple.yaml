@@ -1,0 +1,18 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ethereum-tls-cert
+  namespace: ethereum
+  labels:
+    app.kubernetes.io/component: ethereum-infrastructure
+    app.kubernetes.io/instance: base
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+spec:
+  secretName: ethereum-tls-cert
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "ethereum.example.com"

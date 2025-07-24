@@ -1,0 +1,96 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: servicemonitors.monitoring.coreos.com
+spec:
+  group: monitoring.coreos.com
+  names:
+    categories:
+    - prometheus-operator
+    kind: ServiceMonitor
+    listKind: ServiceMonitorList
+    plural: servicemonitors
+    shortNames:
+    - smon
+    singular: servicemonitor
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: |-
+          The `ServiceMonitor` custom resource definition (CRD) defines how `Prometheus` and `PrometheusAgent` can scrape metrics from a group of services.
+          Among other things, it allows to specify:
+          * The services to scrape via label selectors.
+          * The container ports to scrape.
+          * Authentication credentials to use.
+          * Target and metric relabeling.
+
+          `Prometheus` and `PrometheusAgent` objects select `ServiceMonitor` objects using label and namespace selectors.
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            type: object
+            properties:
+              selector:
+                type: object
+                properties:
+                  matchLabels:
+                    type: object
+                  matchExpressions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        operator:
+                          type: string
+                        values:
+                          type: array
+                          items:
+                            type: string
+              endpoints:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    port:
+                      type: string
+                    path:
+                      type: string
+                    interval:
+                      type: string
+                    scrapeTimeout:
+                      type: string
+                    honorLabels:
+                      type: boolean
+                    metricRelabelings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          sourceLabels:
+                            type: array
+                            items:
+                              type: string
+                          regex:
+                            type: string
+                          action:
+                            type: string
+              namespaceSelector:
+                type: object
+                properties:
+                  matchNames:
+                    type: array
+                    items:
+                      type: string

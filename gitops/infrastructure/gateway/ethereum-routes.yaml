@@ -1,0 +1,53 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ethereum-rpc-route
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    app.kubernetes.io/component: ethereum-workload
+    app.kubernetes.io/instance: workload
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+spec:
+  parentRefs:
+  - name: ethereum-gateway
+    namespace: ethereum
+  hostnames:
+  - "ethereum.example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /rpc
+    backendRefs:
+    - name: ethereum-node
+      port: 8545
+      weight: 1
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ethereum-metrics-route
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    app.kubernetes.io/component: ethereum-workload
+    app.kubernetes.io/instance: workload
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+spec:
+  parentRefs:
+  - name: ethereum-gateway
+    namespace: ethereum
+  hostnames:
+  - "ethereum.example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /metrics
+    backendRefs:
+    - name: ethereum-node
+      port: 6060
+      weight: 1 

@@ -1,0 +1,4 @@
+---
+resources:
+  - vpa-namespace.yaml
+  - ../crds/vpa-crds.yaml

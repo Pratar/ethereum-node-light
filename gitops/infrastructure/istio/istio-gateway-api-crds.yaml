@@ -1,0 +1,132 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gatewayclasses.gateway.networking.k8s.io
+spec:
+  group: gateway.networking.k8s.io
+  names:
+    kind: GatewayClass
+    listKind: GatewayClassList
+    plural: gatewayclasses
+    singular: gatewayclass
+  scope: Cluster
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                controllerName:
+                  type: string
+                description:
+                  type: string
+      subresources: {}
+      additionalPrinterColumns:
+        - name: Controller
+          type: string
+          jsonPath: .spec.controllerName
+        - name: Accepted
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Accepted")].status
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gateways.gateway.networking.k8s.io
+spec:
+  group: gateway.networking.k8s.io
+  names:
+    kind: Gateway
+    listKind: GatewayList
+    plural: gateways
+    singular: gateway
+  scope: Namespaced
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                gatewayClassName:
+                  type: string
+                listeners:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      port:
+                        type: integer
+                      protocol:
+                        type: string
+      subresources: {}
+      additionalPrinterColumns:
+        - name: Class
+          type: string
+          jsonPath: .spec.gatewayClassName
+        - name: Addresses
+          type: string
+          jsonPath: .status.addresses[*].value
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: httproutes.gateway.networking.k8s.io
+spec:
+  group: gateway.networking.k8s.io
+  names:
+    kind: HTTPRoute
+    listKind: HTTPRouteList
+    plural: httproutes
+    singular: httproute
+  scope: Namespaced
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parentRefs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                hostnames:
+                  type: array
+                  items:
+                    type: string
+      subresources: {}
+      additionalPrinterColumns:
+        - name: Hostnames
+          type: string
+          jsonPath: .spec.hostnames
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp 

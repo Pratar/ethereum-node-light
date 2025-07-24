@@ -135,6 +135,44 @@ The test suite includes **18 integration tests** covering:
 - ✅ Web3 client version
 - ✅ SHA3 hashing
 
+### Test Results
+
+**Integration Tests Status**: ✅ **ALL TESTS PASSING**
+
+```bash
+# Test execution results
+pytest ethereum-test-node/tests/integration/test_sepolia_node.py -v
+
+================================================================================
+test session starts =================================================================================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+collected 18 items
+
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_node_connectivity PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_sepolia_chain_id PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_block_number PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_syncing_status PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_balance_query PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_network_version PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_gas_price PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_accounts_list PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_peer_count PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_latest_block_info PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_transaction_count PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_code_at_address PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_storage_at_address PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_estimate_gas PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_call_contract PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_logs_filter PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_web3_client_version PASSED
+ethereum-test-node/tests/integration/test_sepolia_node.py::TestSepoliaNode::test_sha3 PASSED
+
+=================================================================================
+18 passed in 1.18s =================================================================================
+```
+
+**Status**: All integration tests for the Sepolia Ethereum node are **100% PASSING** in the Docker Compose environment.
+
 ## 🐳 Docker Commands
 
 ### Basic Operations

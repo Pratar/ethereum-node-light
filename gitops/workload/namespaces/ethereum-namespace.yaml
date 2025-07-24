@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ethereum
+  labels:
+    app.kubernetes.io/component: ethereum-infrastructure
+    app.kubernetes.io/instance: base
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+  annotations:
+    kustomize.config.k8s.io/needs-hash-suffix: "true"

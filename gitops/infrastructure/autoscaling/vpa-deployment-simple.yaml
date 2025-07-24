@@ -1,0 +1,158 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-recommender
+  namespace: kube-system
+  labels:
+    app: vpa-recommender
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-recommender
+  template:
+    metadata:
+      labels:
+        app: vpa-recommender
+    spec:
+      serviceAccountName: vpa-recommender
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      containers:
+        - name: recommender
+          image: registry.k8s.io/autoscaling/vpa-recommender:1.4.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --v=4
+            - --stderrthreshold=info
+            - --address=:8942
+            - --storage=prometheus
+            - --prometheus-address=http://prometheus.monitoring.svc.cluster.local:9090
+          ports:
+            - name: prometheus
+              containerPort: 8942
+          resources:
+            limits:
+              cpu: 200m
+              memory: 1000Mi
+            requests:
+              cpu: 50m
+              memory: 500Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-updater
+  namespace: kube-system
+  labels:
+    app: vpa-updater
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-updater
+  template:
+    metadata:
+      labels:
+        app: vpa-updater
+    spec:
+      serviceAccountName: vpa-updater
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      containers:
+        - name: updater
+          image: registry.k8s.io/autoscaling/vpa-updater:1.4.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --v=4
+            - --stderrthreshold=info
+            - --address=:8943
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: prometheus
+              containerPort: 8943
+          resources:
+            limits:
+              cpu: 200m
+              memory: 1000Mi
+            requests:
+              cpu: 50m
+              memory: 500Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-admission-controller
+  namespace: kube-system
+  labels:
+    app: vpa-admission-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-admission-controller
+  template:
+    metadata:
+      labels:
+        app: vpa-admission-controller
+    spec:
+      serviceAccountName: vpa-admission-controller
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      containers:
+        - name: admission-controller
+          image: registry.k8s.io/autoscaling/vpa-admission-controller:1.4.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --v=4
+            - --stderrthreshold=info
+            - --address=:8443
+            - --port=8443
+            - --cert-dir=/var/run/serving-cert
+            - --client-ca-file=/var/run/client-ca/ca.crt
+            - --tls-cert-file=/var/run/serving-cert/tls.crt
+            - --tls-private-key-file=/var/run/serving-cert/tls.key
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - name: serving-cert
+              mountPath: /var/run/serving-cert
+            - name: client-ca
+              mountPath: /var/run/client-ca
+          resources:
+            limits:
+              cpu: 200m
+              memory: 1000Mi
+            requests:
+              cpu: 50m
+              memory: 500Mi
+      volumes:
+        - name: serving-cert
+          secret:
+            secretName: vpa-admission-controller-tls
+        - name: client-ca
+          secret:
+            secretName: vpa-admission-controller-ca
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpa-admission-controller
+  namespace: kube-system
+  labels:
+    app: vpa-admission-controller
+spec:
+  ports:
+    - port: 8443
+      targetPort: 8443
+      protocol: TCP
+  selector:
+    app: vpa-admission-controller 

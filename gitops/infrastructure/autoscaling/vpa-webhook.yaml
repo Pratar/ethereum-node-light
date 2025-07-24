@@ -1,0 +1,21 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: vpa-webhook-config
+webhooks:
+  - name: admission-webhook.vpa.k8s.io
+    clientConfig:
+      service:
+        name: vpa-admission-controller
+        namespace: kube-system
+        port: 8000
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+        scope: "*"
+    failurePolicy: Ignore
+    sideEffects: None
+    admissionReviewVersions: ["v1"] 

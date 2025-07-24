@@ -1,0 +1,74 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ethereum-node-network-policy
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    app.kubernetes.io/component: ethereum-workload
+    app.kubernetes.io/instance: workload
+    app.kubernetes.io/name: ethereum-node
+    app.kubernetes.io/version: v1.0.0
+spec:
+  podSelector:
+    matchLabels:
+      app: ethereum-node
+      app.kubernetes.io/component: ethereum-workload
+      app.kubernetes.io/instance: workload
+      app.kubernetes.io/name: ethereum-node
+      app.kubernetes.io/version: v1.0.0
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Разрешаем доступ только от Ingress контроллера
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8545
+    - protocol: TCP
+      port: 6060
+  # Разрешаем P2P трафик между нодами
+  - from:
+    - podSelector:
+        matchLabels:
+          app: ethereum-node
+          app.kubernetes.io/component: ethereum-workload
+          app.kubernetes.io/instance: workload
+          app.kubernetes.io/name: ethereum-node
+          app.kubernetes.io/version: v1.0.0
+    ports:
+    - protocol: TCP
+      port: 30303
+    - protocol: UDP
+      port: 30303
+  egress:
+  # Разрешаем исходящий трафик для P2P
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 30303
+    - protocol: UDP
+      port: 30303
+  # Разрешаем DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+  # Разрешаем доступ к kube-dns
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53

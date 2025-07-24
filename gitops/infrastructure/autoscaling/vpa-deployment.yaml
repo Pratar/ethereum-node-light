@@ -1,0 +1,141 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-admission-controller
+  namespace: kube-system
+  labels:
+    app: vpa-admission-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-admission-controller
+  template:
+    metadata:
+      labels:
+        app: vpa-admission-controller
+    spec:
+      serviceAccountName: vpa-admission-controller
+      containers:
+        - name: admission-controller
+          image: registry.k8s.io/autoscaling/vpa-admission-controller:v0.13.0
+          ports:
+            - containerPort: 8000
+          command:
+            - ./admission-controller
+            - --client-ca-file=/etc/kubernetes/ca-bundle/ca-bundle.crt
+            - --tls-cert-file=/etc/kubernetes/certs/tls.crt
+            - --tls-private-key-file=/etc/kubernetes/certs/tls.key
+            - --address=:8000
+            - --port=8000
+            - --logtostderr=true
+            - --stderrthreshold=info
+            - --v=2
+          volumeMounts:
+            - name: ca-bundle
+              mountPath: /etc/kubernetes/ca-bundle
+              readOnly: true
+            - name: tls-certs
+              mountPath: /etc/kubernetes/certs
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: ca-bundle
+          configMap:
+            name: vpa-tls-ca-bundle
+        - name: tls-certs
+          secret:
+            secretName: vpa-tls-certs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-recommender
+  namespace: kube-system
+  labels:
+    app: vpa-recommender
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-recommender
+  template:
+    metadata:
+      labels:
+        app: vpa-recommender
+    spec:
+      serviceAccountName: vpa-recommender
+      containers:
+        - name: recommender
+          image: registry.k8s.io/autoscaling/vpa-recommender:v0.13.0
+          command:
+            - ./recommender
+            - --v=3
+            - --stderrthreshold=info
+            - --pod-recommendation-min-cpu-millicores=5
+            - --pod-recommendation-min-memory-mb=500
+            - --memory-saver=true
+            - --address=:8942
+            - --metrics-address=:8943
+          ports:
+            - name: server
+              containerPort: 8942
+            - name: metrics
+              containerPort: 8943
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-updater
+  namespace: kube-system
+  labels:
+    app: vpa-updater
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-updater
+  template:
+    metadata:
+      labels:
+        app: vpa-updater
+    spec:
+      serviceAccountName: vpa-updater
+      containers:
+        - name: updater
+          image: registry.k8s.io/autoscaling/vpa-updater:v0.13.0
+          command:
+            - ./updater
+            - --v=3
+            - --stderrthreshold=info
+            - --address=:8080
+            - --evict-after-oom-treshold=30m0s
+            - --eviction-rate-burst=1
+            - --eviction-rate-limit=0.1
+            - --eviction-tolerance=0.5
+            - --inrecommendation-eviction-tolerance=0.1
+            - --min-replicas=1
+            - --updater-interval=1m0s
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL 

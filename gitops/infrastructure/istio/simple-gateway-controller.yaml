@@ -1,0 +1,69 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-gateway-controller
+  namespace: istio-system
+  labels:
+    app: simple-gateway-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-gateway-controller
+  template:
+    metadata:
+      labels:
+        app: simple-gateway-controller
+    spec:
+      serviceAccountName: simple-gateway-controller
+      containers:
+        - name: controller
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              echo "Gateway API Controller starting..."
+              while true; do
+                echo "Controller running..."
+                sleep 30
+              done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: simple-gateway-controller
+  namespace: istio-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: simple-gateway-controller
+rules:
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources: ["gateways", "gatewayclasses", "httproutes", "grpcroutes", "tlsroutes", "referencegrants"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["services", "endpoints", "pods", "nodes", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: simple-gateway-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: simple-gateway-controller
+subjects:
+  - kind: ServiceAccount
+    name: simple-gateway-controller
+    namespace: istio-system 

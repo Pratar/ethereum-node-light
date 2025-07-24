@@ -1,0 +1,82 @@
+groups:
+  - name: ethereum
+    rules:
+      # Ethereum node is down
+      - alert: EthereumNodeDown
+        expr: up{job="ethereum-node"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ethereum node is down"
+          description: "Ethereum node has been down for more than 1 minute"
+
+      # Ethereum node is not syncing
+      - alert: EthereumNodeNotSyncing
+        expr: ethereum_eth_syncing == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum node is not syncing"
+          description: "Ethereum node has been out of sync for more than 5 minutes"
+
+      # High memory usage
+      - alert: EthereumNodeHighMemory
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum node high memory usage"
+          description: "Ethereum node memory usage is above 90%"
+
+      # High CPU usage
+      - alert: EthereumNodeHighCPU
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum node high CPU usage"
+          description: "Ethereum node CPU usage is above 80%"
+
+      # High disk usage
+      - alert: EthereumNodeHighDisk
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum node high disk usage"
+          description: "Ethereum node disk usage is above 90%"
+
+      # Low peer count
+      - alert: EthereumNodeLowPeers
+        expr: ethereum_p2p_peers < 3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum node low peer count"
+          description: "Ethereum node has less than 3 peers"
+
+      # RPC errors
+      - alert: EthereumNodeRPCErrors
+        expr: rate(ethereum_rpc_requests_total{status="error"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum node RPC errors"
+          description: "Ethereum node is experiencing RPC errors"
+
+      # Block storage limit approaching
+      - alert: EthereumNodeStorageLimit
+        expr: ethereum_chain_head_block > 90
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ethereum node approaching storage limit"
+          description: "Ethereum node is approaching the 100 block storage limit" 

@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  # Ethereum Node (используем готовый образ)
+  ethereum-node:
+    image: ethereum/client-go:v1.13.0
+    container_name: ethereum-test-node
+    restart: unless-stopped
+    ports:
+      - "8545:8545"  # RPC
+      - "8546:8546"  # WebSocket
+      - "30303:30303"  # P2P TCP
+      - "30303:30303/udp"  # P2P UDP
+      - "6060:6060"  # Metrics
+    environment:
+      - ETHEREUM_NETWORK=goerli
+      - ETHEREUM_SYNC_MODE=light
+      - ETHEREUM_MAX_BLOCKS=100
+      - ETHEREUM_MAX_PEERS=10
+    volumes:
+      - ethereum-data:/data
+      - ./logs:/var/log/ethereum
+    networks:
+      - ethereum-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:6060/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    command: [
+      "--networkid=5",
+      "--syncmode=light",
+      "--maxpeers=10",
+      "--http",
+      "--http.addr=0.0.0.0",
+      "--http.port=8545",
+      "--http.api=eth,net,web3,personal,debug",
+      "--http.corsdomain=*",
+      "--http.vhosts=*",
+      "--metrics",
+      "--metrics.addr=0.0.0.0",
+      "--metrics.port=6060",
+      "--verbosity=3",
+      "--datadir=/data",
+      "--cache=512"
+    ]
+
+  # Prometheus для мониторинга
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - ethereum-network
+    depends_on:
+      - ethereum-node
+
+  # Grafana для дашбордов
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - ethereum-network
+    depends_on:
+      - prometheus
+
+  # Node Exporter для системных метрик
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - ethereum-network
+
+  # Ethereum Metrics Exporter
+  ethereum-exporter:
+    image: python:3.9-alpine
+    container_name: ethereum-exporter
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+    volumes:
+      - ./monitoring/ethereum-exporter.py:/app/exporter.py
+    working_dir: /app
+    command: >
+      sh -c "
+        pip install requests &&
+        python exporter.py
+      "
+    networks:
+      - ethereum-network
+    depends_on:
+      - ethereum-node
+
+volumes:
+  ethereum-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  ethereum-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

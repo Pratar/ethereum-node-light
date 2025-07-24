@@ -1,0 +1,9 @@
+# Core dependencies
+pyyaml>=6.0
+requests>=2.28.0
+
+# Monitoring dependencies
+prometheus-client>=0.16.0
+
+# Proxy dependencies
+urllib3>=1.26.0

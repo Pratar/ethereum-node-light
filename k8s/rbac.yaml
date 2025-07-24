@@ -1,0 +1,76 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ethereum-node
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    component: security
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ethereum-node-role
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    component: security
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ethereum-node-role-binding
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+    component: security
+subjects:
+  - kind: ServiceAccount
+    name: ethereum-node
+    namespace: ethereum
+roleRef:
+  kind: Role
+  name: ethereum-node-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ethereum-node-cluster-role
+  labels:
+    app: ethereum-node
+    component: security
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ethereum-node-cluster-role-binding
+  labels:
+    app: ethereum-node
+    component: security
+subjects:
+  - kind: ServiceAccount
+    name: ethereum-node
+    namespace: ethereum
+roleRef:
+  kind: ClusterRole
+  name: ethereum-node-cluster-role
+  apiGroup: rbac.authorization.k8s.io

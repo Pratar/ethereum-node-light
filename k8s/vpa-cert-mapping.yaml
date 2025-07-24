@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vpa-cert-mapping
+  namespace: kube-system
+data:
+  serverCert.pem: |
+    {{ .Values.serverCert.pem }}
+  serverKey.pem: |
+    {{ .Values.serverKey.pem }}
+  caCert.pem: |-
+    {{ .Values.caCert.pem }}

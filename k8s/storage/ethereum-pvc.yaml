@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ethereum-data-pvc
+  namespace: ethereum
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ethereum-storage
+  resources:
+    requests:
+      storage: 100Gi

@@ -1,0 +1,296 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: verticalpodautoscalers.autoscaling.k8s.io
+  annotations:
+    api-approved.kubernetes.io: true
+spec:
+  group: autoscaling.k8s.io
+  names:
+    kind: VerticalPodAutoscaler
+    listKind: VerticalPodAutoscalerList
+    plural: verticalpodautoscalers
+    shortNames:
+      - vpa
+    singular: verticalpodautoscaler
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                targetRef:
+                  type: object
+                  properties:
+                    apiVersion:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                updatePolicy:
+                  type: object
+                  properties:
+                    updateMode:
+                      type: string
+                      enum:
+                        - Off
+                        - Initial
+                        - Recreate
+                        - Auto
+                resourcePolicy:
+                  type: object
+                  properties:
+                    containerPolicies:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          containerName:
+                            type: string
+                          minAllowed:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          maxAllowed:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          controlledResources:
+                            type: array
+                            items:
+                              type: string
+                          controlledValues:
+                            type: string
+                            enum:
+                              - RequestsAndLimits
+                              - RequestsOnly
+            status:
+              type: object
+              properties:
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                recommendation:
+                  type: object
+                  properties:
+                    containerRecommendations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          containerName:
+                            type: string
+                          target:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          lowerBound:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          upperBound:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          uncappedTarget:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+      additionalPrinterColumns:
+        - name: Mode
+          type: string
+          jsonPath: .spec.updatePolicy.updateMode
+        - name: Cpu
+          type: string
+          jsonPath: .status.recommendation.containerRecommendations[0].target.cpu
+        - name: Mem
+          type: string
+          jsonPath: .status.recommendation.containerRecommendations[0].target.memory
+        - name: Targets
+          type: string
+          jsonPath: .status.recommendation.containerRecommendations[*].containerName
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      subresources:
+        status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: verticalpodautoscalercheckpoints.autoscaling.k8s.io
+  annotations:
+    api-approved.kubernetes.io: true
+spec:
+  group: autoscaling.k8s.io
+  names:
+    kind: VerticalPodAutoscalerCheckpoint
+    listKind: VerticalPodAutoscalerCheckpointList
+    plural: verticalpodautoscalercheckpoints
+    singular: verticalpodautoscalercheckpoint
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                vpaObjectName:
+                  type: string
+                containerName:
+                  type: string
+            status:
+              type: object
+              properties:
+                firstRecommendation:
+                  type: object
+                  properties:
+                    containerRecommendations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          containerName:
+                            type: string
+                          target:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          lowerBound:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          upperBound:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          uncappedTarget:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                lastRecommendation:
+                  type: object
+                  properties:
+                    containerRecommendations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          containerName:
+                            type: string
+                          target:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          lowerBound:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          upperBound:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                          uncappedTarget:
+                            type: object
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                cpuHistogram:
+                  type: object
+                  properties:
+                    bucketWeights:
+                      type: object
+                      additionalProperties:
+                        type: number
+                    referenceTimestamp:
+                      type: string
+                      format: date-time
+                memoryHistogram:
+                  type: object
+                  properties:
+                    bucketWeights:
+                      type: object
+                      additionalProperties:
+                        type: number
+                    referenceTimestamp:
+                      type: string
+                      format: date-time
+      additionalPrinterColumns:
+        - name: VPA
+          type: string
+          jsonPath: .spec.vpaObjectName
+        - name: Container
+          type: string
+          jsonPath: .spec.containerName
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      subresources:
+        status: {}

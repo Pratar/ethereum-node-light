@@ -1,0 +1,25 @@
+---
+# Конфигурация yamlfmt для соответствия стандартам yamllint
+formatter:
+  type: basic
+  indent: 2          # Соответствует стандарту YAML (2 пробела)
+  include_document_start: true   # Добавляем --- в начале документов
+  line_ending: lf               # Unix-style line endings
+  retain_line_breaks_single: true  # Сохраняем одиночные переносы строк
+  drop_merge_tag: false         # Сохраняем merge теги (!!merge)
+  pad_line_comments: 2          # 2 пробела перед комментариями (соответствует yamllint)
+  trim_trailing_whitespace: true  # Удаляем trailing пробелы
+  eof_newline: true            # Обязательная пустая строка в конце файла
+
+# Файлы для обработки
+include:
+  - "*.yaml"
+  - "*.yml"
+  - ".yamllint"
+
+# Исключения
+exclude:
+  - ".git/**"
+  - ".terraform/**"
+  - "node_modules/**"
+  - "vendor/**" 

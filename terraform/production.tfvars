@@ -1,0 +1,8 @@
+project_id = "ethereum-test-node-1752961365"
+region = "us-central1"
+zone = "us-central1-a"
+cluster_name = "ethereum-cluster"
+vpc_name = "ethereum-vpc"
+subnet_name = "ethereum-subnet"
+node_pool_name = "ethereum-node-pool"
+storage_bucket_name = "ethereum-data" 

@@ -1,0 +1,159 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ethereum
+  labels:
+    name: ethereum
+    app: ethereum-node
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ethereum-node
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ethereum-node
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+spec:
+  serviceName: ethereum-node-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ethereum-node
+  template:
+    metadata:
+      labels:
+        app: ethereum-node
+    spec:
+      serviceAccountName: ethereum-node
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop:
+            - ALL
+      containers:
+        - name: ethereum-node
+          image: ethereum/client-go:v1.13.0
+          ports:
+            - name: rpc
+              containerPort: 8545
+              protocol: TCP
+            - name: p2p
+              containerPort: 30303
+              protocol: TCP
+            - name: p2p-udp
+              containerPort: 30303
+              protocol: UDP
+            - name: metrics
+              containerPort: 6060
+              protocol: TCP
+          env:
+            - name: ETHEREUM_NETWORK
+              value: "sepolia"
+            - name: ETHEREUM_SYNC_MODE
+              value: "light"
+            - name: ETHEREUM_MAX_PEERS
+              value: "10"
+            - name: ETHEREUM_MAX_BLOCKS
+              value: "100"
+            - name: ETHEREUM_HTTP_PORT
+              value: "8545"
+            - name: ETHEREUM_P2P_PORT
+              value: "30303"
+            - name: ETHEREUM_METRICS_PORT
+              value: "6060"
+          args:
+            - "--sepolia"
+            - "--syncmode=light"
+            - "--maxpeers=10"
+            - "--http"
+            - "--http.addr=0.0.0.0"
+            - "--http.port=8545"
+            - "--http.api=eth,net,web3,personal,debug"
+            - "--http.corsdomain=*"
+            - "--http.vhosts=*"
+            - "--metrics"
+            - "--metrics.addr=0.0.0.0"
+            - "--metrics.port=6060"
+            - "--verbosity=3"
+            - "--datadir=/data"
+            - "--cache=512"
+            - "--history.state=100"
+            - "--history.transactions=100"
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 2Gi
+            limits:
+              cpu: 4000m
+              memory: 8Gi
+          livenessProbe:
+            httpGet:
+              path: /debug/metrics
+              port: 6060
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /debug/metrics
+              port: 6060
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: ethereum-data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: ethereum-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "standard"
+        resources:
+          requests:
+            storage: 100Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ethereum-node
+  namespace: ethereum
+  labels:
+    app: ethereum-node
+spec:
+  type: ClusterIP
+  ports:
+    - name: rpc
+      port: 8545
+      targetPort: 8545
+      protocol: TCP
+    - name: p2p
+      port: 30303
+      targetPort: 30303
+      protocol: TCP
+    - name: p2p-udp
+      port: 30303
+      targetPort: 30303
+      protocol: UDP
+    - name: metrics
+      port: 6060
+      targetPort: 6060
+      protocol: TCP
+  selector:
+    app: ethereum-node

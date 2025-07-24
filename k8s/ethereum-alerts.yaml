@@ -1,0 +1,112 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ethereum-node-alerts
+  namespace: ethereum
+  labels:
+    release: prometheus
+    app: ethereum-node
+spec:
+  groups:
+    - name: ethereum-node
+      rules:
+        # Алерт на недоступность Ethereum ноды
+        - alert: EthereumNodeDown
+          expr: up{app="ethereum-node"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Ethereum нода недоступна"
+            description: "Ethereum нода {{ $labels.instance }} недоступна более 1 минуты"
+
+        # Алерт на проблемы с синхронизацией
+        - alert: EthereumNodeNotSyncing
+          expr: ethereum_eth_syncing == 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Ethereum нода не синхронизируется"
+            description: "Ethereum нода {{ $labels.instance }} не синхронизируется более 5 минут"
+
+        # Алерт на высокое использование CPU
+        - alert: EthereumNodeHighCPU
+          expr: rate(process_cpu_seconds_total{app="ethereum-node"}[5m]) * 100 > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Высокое использование CPU Ethereum ноды"
+            description: "Ethereum нода {{ $labels.instance }} использует более 80% CPU"
+
+        # Алерт на высокое использование памяти
+        - alert: EthereumNodeHighMemory
+          expr: (process_resident_memory_bytes{app="ethereum-node"} / container_memory_usage_bytes{app="ethereum-node"}) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Высокое использование памяти Ethereum ноды"
+            description: "Ethereum нода {{ $labels.instance }} использует более 85% памяти"
+
+        # Алерт на проблемы с диском
+        - alert: EthereumNodeDiskSpace
+          expr: (container_fs_usage_bytes{app="ethereum-node"} / container_fs_capacity_bytes{app="ethereum-node"}) * 100 > 90
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Заканчивается место на диске Ethereum ноды"
+            description: "Ethereum нода {{ $labels.instance }} использует более 90% дискового пространства"
+
+        # Алерт на проблемы с сетью
+        - alert: EthereumNodeNetworkErrors
+          expr: rate(ethereum_eth_network_errors_total{app="ethereum-node"}[5m]) > 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Ошибки сети Ethereum ноды"
+            description: "Ethereum нода {{ $labels.instance }} имеет ошибки сети"
+
+        # Алерт на проблемы с P2P соединениями
+        - alert: EthereumNodeP2PConnections
+          expr: ethereum_eth_p2p_connections{app="ethereum-node"} < 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Мало P2P соединений Ethereum ноды"
+            description: "Ethereum нода {{ $labels.instance }} имеет менее 5 P2P соединений"
+
+        # Алерт на проблемы с RPC
+        - alert: EthereumNodeRPCErrors
+          expr: rate(http_requests_total{app="ethereum-node",status=~"5.."}[5m]) > 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Ошибки RPC Ethereum ноды"
+            description: "Ethereum нода {{ $labels.instance }} возвращает 5xx ошибки"
+
+        # Алерт на события скалирования
+        - alert: EthereumNodeScalingEvent
+          expr: increase(kube_horizontalpodautoscaler_status_current_replicas{horizontalpodautoscaler="ethereum-node-hpa"}[5m]) > 0
+          for: 1m
+          labels:
+            severity: info
+          annotations:
+            summary: "Событие скалирования Ethereum ноды"
+            description: "Ethereum нода была отмасштабирована"
+
+        # Алерт на проблемы с VPA
+        - alert: EthereumNodeVPARecommendation
+          expr: vpa_recommendation_container_cpu_target{container="ethereum-node"} > 0
+          for: 5m
+          labels:
+            severity: info
+          annotations:
+            summary: "VPA рекомендует изменение ресурсов Ethereum ноды"
+            description: "VPA рекомендует изменить ресурсы для Ethereum ноды {{ $labels.instance }}"

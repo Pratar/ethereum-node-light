@@ -1,0 +1,94 @@
+---
+# Values для Ethereum ноды без мониторинга
+replicaCount: 1
+
+# Отключаем мониторинг
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+  prometheusRule:
+    enabled: false
+
+# Отключаем ingress
+ingress:
+  enabled: false
+
+# Отключаем backup
+backup:
+  enabled: false
+
+# Убираем node selector и tolerations
+nodeSelector: null
+tolerations: null
+
+# Настройки сети
+ethereum:
+  network: "goerli"
+  syncMode: "light"
+  maxPeers: 10
+  maxBlocks: 100
+
+# Исправляем network ID для Goerli
+args:
+  - "--networkid=5"  # Goerli network ID
+  - "--syncmode=light"
+  - "--maxpeers=10"
+  - "--http"
+  - "--http.addr=0.0.0.0"
+  - "--http.port=8545"
+  - "--http.api=eth,net,web3,personal,debug"
+  - "--http.corsdomain=*"
+  - "--http.vhosts=*"
+  - "--metrics"
+  - "--metrics.addr=0.0.0.0"
+  - "--metrics.port=6060"
+  - "--verbosity=3"
+  - "--datadir=/data"
+  - "--cache=512"
+
+# Настройки ресурсов
+pod:
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+
+# Настройки хранилища
+storage:
+  enabled: true
+  size: "100Gi"
+  storageClass: "standard"
+  accessMode: "ReadWriteOnce"
+  mountPath: "/data"
+
+# Настройки безопасности
+security:
+  jwtSecret:
+    enabled: false
+  networkPolicy:
+    enabled: false
+
+# Настраиваем правильные health checks
+healthCheck:
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+    httpGet:
+      path: /debug/metrics
+      port: 6060
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    httpGet:
+      path: /debug/metrics
+      port: 6060

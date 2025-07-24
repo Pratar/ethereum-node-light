@@ -1,0 +1,62 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ethereum-scaling-alerts
+  namespace: ethereum
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: ethereum-scaling
+      rules:
+        - alert: EthereumNodeHPAScalingUp
+          expr: increase(kube_horizontalpodautoscaler_status_current_replicas[5m]) > 0
+          for: 1m
+          labels:
+            severity: info
+            component: autoscaler
+          annotations:
+            summary: "Ethereum node HPA scaling up"
+            description: "Ethereum node is scaling up due to high load"
+
+        - alert: EthereumNodeHPAScalingDown
+          expr: decrease(kube_horizontalpodautoscaler_status_current_replicas[5m]) > 0
+          for: 1m
+          labels:
+            severity: info
+            component: autoscaler
+          annotations:
+            summary: "Ethereum node HPA scaling down"
+            description: "Ethereum node is scaling down due to low load"
+
+        - alert: EthereumNodeVPARecommendation
+          expr: vpa_recommendation_container_cpu_target > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: autoscaler
+          annotations:
+            summary: "Ethereum node VPA CPU recommendation"
+            description: "VPA recommends CPU adjustment for Ethereum node"
+
+        - alert: EthereumNodeHighCPUUsage
+          expr: container_cpu_usage_seconds_total{container="ethereum-node"} > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            component: ethereum
+          annotations:
+            summary: "Ethereum node high CPU usage"
+            description: "Ethereum node CPU usage is above 80%"
+
+        - alert: EthereumNodeHighMemoryUsage
+          expr: container_memory_usage_bytes{container="ethereum-node"} / container_spec_memory_limit_bytes{container="ethereum-node"} > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            component: ethereum
+          annotations:
+            summary: "Ethereum node high memory usage"
+            description: "Ethereum node memory usage is above 80%"

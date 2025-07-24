@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ethereum-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  ethereum-dashboard.json: |-
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Ethereum Node Dashboard",
+        "tags": ["ethereum", "node"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Ethereum Node Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "up{job=\"ethereum-node\"}",
+                "legendFormat": "Node Status"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }

@@ -1,0 +1,35 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vpa-cert-copy
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      serviceAccountName: vpa-admission-controller
+      containers:
+        - name: cert-copy
+          image: busybox:1.35
+          command:
+            - /bin/sh
+            - -c
+            - |
+              kubectl get secret vpa-tls-certs -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/serverCert.pem
+              kubectl get secret vpa-tls-certs -o jsonpath='{.data.tls\.key}' | base64 -d > /tmp/serverKey.pem
+              kubectl get secret vpa-tls-certs -o jsonpath='{.data.ca\.crt}' | base64 -d > /tmp/caCert.pem
+
+              kubectl create secret generic vpa-tls-certs-new \
+                --from-file=serverCert.pem=/tmp/serverCert.pem \
+                --from-file=serverKey.pem=/tmp/serverKey.pem \
+                --from-file=caCert.pem=/tmp/caCert.pem \
+                --dry-run=client -o yaml | kubectl apply -f -
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /tmp
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: vpa-tls-certs
+      restartPolicy: Never
+  backoffLimit: 3

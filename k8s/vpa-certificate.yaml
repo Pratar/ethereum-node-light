@@ -1,0 +1,16 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vpa-tls-cert
+  namespace: kube-system
+spec:
+  secretName: vpa-tls-certs
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "vpa-admission-controller.kube-system.svc"
+    - "vpa-admission-controller.kube-system.svc.cluster.local"
+  duration: 2160h  # 90 days
+  renewBefore: 360h  # 15 days

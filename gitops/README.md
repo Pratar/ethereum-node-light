@@ -17,12 +17,12 @@ Complete GitOps infrastructure for deploying Ethereum nodes with automatic scali
 ```bash
 # Clone repository
 git clone <repository-url>
-cd node-eth
+cd ethereum-node-light
 
 # Set up GCP project
 gcloud config set project YOUR_PROJECT_ID
 
-# Create GKE cluster (if not exists)
+# Create GKE cluster manual (if not exists)
 gcloud container clusters create ethereum-cluster \
   --region us-central1 \
   --num-nodes 3 \

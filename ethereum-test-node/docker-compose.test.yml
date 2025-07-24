@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Ethereum Node (используем готовый образ)
+  # Ethereum Node (using pre-built image)
   ethereum-node:
     image: ethereum/client-go:v1.13.0
     container_name: ethereum-test-node
@@ -46,7 +46,7 @@ services:
       "--cache=512"
     ]
 
-  # Prometheus для мониторинга
+  # Prometheus for monitoring
   prometheus:
     image: prom/prometheus:v2.47.0
     container_name: prometheus
@@ -70,7 +70,7 @@ services:
     depends_on:
       - ethereum-node
 
-  # Grafana для дашбордов
+  # Grafana for dashboards
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -90,7 +90,7 @@ services:
     depends_on:
       - prometheus
 
-  # Node Exporter для системных метрик
+  # Node Exporter for system metrics
   node-exporter:
     image: prom/node-exporter:v1.6.1
     container_name: node-exporter

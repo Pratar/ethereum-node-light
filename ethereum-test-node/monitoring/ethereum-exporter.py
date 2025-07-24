@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Простой экспортер метрик для Ethereum node
-Преобразует JSON метрики geth в формат Prometheus
+Simple metrics exporter for Ethereum node
+Converts JSON metrics from geth to Prometheus format
 """
 
 import requests
@@ -19,12 +19,12 @@ class MetricsExporter(BaseHTTPRequestHandler):
             self.end_headers()
             
             try:
-                # Получаем метрики от geth
+                # Get metrics from geth
                 response = requests.get('http://ethereum-node:6060/debug/metrics', timeout=5)
                 if response.status_code == 200:
                     metrics_data = response.json()
                     
-                    # Преобразуем в формат Prometheus
+                    # Convert to Prometheus format
                     prometheus_metrics = self.convert_to_prometheus(metrics_data)
                     self.wfile.write(prometheus_metrics.encode())
                 else:
@@ -36,25 +36,25 @@ class MetricsExporter(BaseHTTPRequestHandler):
             self.end_headers()
     
     def convert_to_prometheus(self, metrics_data):
-        """Преобразует JSON метрики в формат Prometheus"""
+        """Converts JSON metrics to Prometheus format"""
         prometheus_lines = []
         
-        # Добавляем информацию о метриках
+        # Add metrics information
         prometheus_lines.append('# HELP ethereum_node_info Ethereum node information')
         prometheus_lines.append('# TYPE ethereum_node_info gauge')
         prometheus_lines.append('ethereum_node_info{version="geth"} 1')
         
-        # Обрабатываем основные метрики
+        # Process main metrics
         for key, value in metrics_data.items():
             if isinstance(value, (int, float)) and not isinstance(value, bool):
-                # Преобразуем ключ в формат Prometheus
+                # Convert key to Prometheus format
                 metric_name = self.sanitize_metric_name(key)
                 prometheus_lines.append(f'# HELP {metric_name} {key}')
                 prometheus_lines.append(f'# TYPE {metric_name} gauge')
                 prometheus_lines.append(f'{metric_name} {value}')
-            # Исключаем булевы значения для избежания ошибок парсинга
+            # Exclude boolean values to avoid parsing errors
         
-        # Обрабатываем memstats
+        # Process memstats
         if 'memstats' in metrics_data:
             memstats = metrics_data['memstats']
             for key, value in memstats.items():
@@ -63,26 +63,26 @@ class MetricsExporter(BaseHTTPRequestHandler):
                     prometheus_lines.append(f'# HELP {metric_name} Memory statistic: {key}')
                     prometheus_lines.append(f'# TYPE {metric_name} gauge')
                     prometheus_lines.append(f'{metric_name} {value}')
-                # Исключаем булевы значения для избежания ошибок парсинга
+                # Exclude boolean values to avoid parsing errors
         
         return '\n'.join(prometheus_lines) + '\n'
     
     def sanitize_metric_name(self, name):
-        """Преобразует имя метрики в формат Prometheus"""
-        # Заменяем недопустимые символы
+        """Converts metric name to Prometheus format"""
+        # Replace invalid characters
         name = re.sub(r'[^a-zA-Z0-9_:]', '_', name)
-        # Убираем множественные подчеркивания
+        # Remove multiple underscores
         name = re.sub(r'_+', '_', name)
-        # Убираем подчеркивания в начале и конце
+        # Remove underscores at the beginning and end
         name = name.strip('_')
         return name
     
     def log_message(self, format, *args):
-        # Отключаем логирование для чистоты вывода
+        # Disable logging for clean output
         pass
 
 def run_exporter(port=9091):
-    """Запускает экспортер метрик"""
+    """Starts the metrics exporter"""
     server = HTTPServer(('0.0.0.0', port), MetricsExporter)
     print(f'Starting metrics exporter on port {port}')
     server.serve_forever()

@@ -96,49 +96,49 @@ class BlockStorage:
     
     def add_block(self, block_number: int, block_data: Dict[str, Any]) -> bool:
         """
-        Добавление блока в хранилище
+        Add block to storage
         
         Args:
-            block_number: Номер блока
-            block_data: Данные блока
+            block_number: Block number
+            block_data: Block data
             
         Returns:
-            True если блок добавлен, False если уже существует
+            True if block added, False if already exists
         """
         if self.has_block(block_number):
-            logger.debug(f"Блок {block_number} уже существует")
+            logger.debug(f"Block {block_number} already exists")
             return False
         
-        # Проверка лимита блоков
+        # Check block limit
         if len(self.block_queue) >= self.max_blocks:
             self._remove_oldest_block()
         
-        # Сохранение блока
+        # Save block
         block_file = os.path.join(self.blocks_dir, f"{block_number}.json")
         try:
             with open(block_file, 'w') as f:
                 json.dump(block_data, f, indent=2)
             
-            # Обновление очереди и метаданных
+            # Update queue and metadata
             self.block_queue.append(block_number)
             self._update_metadata()
             
-            logger.info(f"Блок {block_number} добавлен")
+            logger.info(f"Block {block_number} added")
             return True
             
         except Exception as e:
-            logger.error(f"Ошибка сохранения блока {block_number}: {e}")
+            logger.error(f"Error saving block {block_number}: {e}")
             return False
     
     def get_block(self, block_number: int) -> Optional[Dict[str, Any]]:
         """
-        Получение блока по номеру
+        Get block by number
         
         Args:
-            block_number: Номер блока
+            block_number: Block number
             
         Returns:
-            Данные блока или None если не найден
+            Block data or None if not found
         """
         if not self.has_block(block_number):
             return None
@@ -148,31 +148,31 @@ class BlockStorage:
             with open(block_file, 'r') as f:
                 return json.load(f)
         except Exception as e:
-            logger.error(f"Ошибка чтения блока {block_number}: {e}")
+            logger.error(f"Error reading block {block_number}: {e}")
             return None
     
     def has_block(self, block_number: int) -> bool:
         """
-        Проверка наличия блока
+        Check if block exists
         
         Args:
-            block_number: Номер блока
+            block_number: Block number
             
         Returns:
-            True если блок существует
+            True if block exists
         """
         block_file = os.path.join(self.blocks_dir, f"{block_number}.json")
         return os.path.exists(block_file)
     
     def remove_block(self, block_number: int) -> bool:
         """
-        Удаление блока
+        Remove block
         
         Args:
-            block_number: Номер блока
+            block_number: Block number
             
         Returns:
-            True если блок удален
+            True if block removed
         """
         if not self.has_block(block_number):
             return False
@@ -181,29 +181,29 @@ class BlockStorage:
         try:
             os.remove(block_file)
             
-            # Удаление из очереди
+            # Remove from queue
             if block_number in self.block_queue:
                 self.block_queue.remove(block_number)
             
             self._update_metadata()
-            logger.info(f"Блок {block_number} удален")
+            logger.info(f"Block {block_number} removed")
             return True
             
         except Exception as e:
-            logger.error(f"Ошибка удаления блока {block_number}: {e}")
+            logger.error(f"Error removing block {block_number}: {e}")
             return False
     
     def _remove_oldest_block(self):
-        """Удаление самого старого блока"""
+        """Remove oldest block"""
         if not self.block_queue:
             return
         
         oldest_block = self.block_queue[0]
         self.remove_block(oldest_block)
-        logger.info(f"Удален самый старый блок: {oldest_block}")
+        logger.info(f"Removed oldest block: {oldest_block}")
     
     def _update_metadata(self):
-        """Обновление метаданных"""
+        """Update metadata"""
         self.metadata["total_blocks"] = len(self.block_queue)
         self.metadata["oldest_block"] = self.block_queue[0] if self.block_queue else None
         self.metadata["newest_block"] = self.block_queue[-1] if self.block_queue else None
@@ -212,7 +212,7 @@ class BlockStorage:
         self._save_metadata()
     
     def _calculate_storage_size(self) -> int:
-        """Вычисление размера хранилища в байтах"""
+        """Calculate storage size in bytes"""
         total_size = 0
         
         if os.path.exists(self.blocks_dir):
@@ -221,7 +221,7 @@ class BlockStorage:
                 if os.path.isfile(file_path):
                     total_size += os.path.getsize(file_path)
         
-        # Добавляем размер метаданных
+        # Add metadata size
         if os.path.exists(self.metadata_file):
             total_size += os.path.getsize(self.metadata_file)
         

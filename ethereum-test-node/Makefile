@@ -33,19 +33,19 @@ dev-setup: ## Setup local development environment
 
 test: ## Run all tests
 	@echo "$(BLUE)Running all tests...$(NC)"
-	@python -m pytest $(TESTS_DIR)/ -v
+	@python3 -m pytest $(TESTS_DIR)/ -v
 
 test-unit: ## Run unit tests
 	@echo "$(BLUE)Running unit tests...$(NC)"
-	@python -m pytest $(TESTS_DIR)/unit/ -v
+	@python3 -m pytest $(TESTS_DIR)/unit/ -v
 
 test-integration: ## Run integration tests
 	@echo "$(BLUE)Running integration tests...$(NC)"
-	@python -m pytest $(TESTS_DIR)/integration/ -v
+	@python3 -m pytest $(TESTS_DIR)/integration/ -v
 
 test-e2e: ## Run E2E tests
 	@echo "$(BLUE)Running E2E tests...$(NC)"
-	@python -m pytest $(TESTS_DIR)/e2e/ -v
+	@python3 -m pytest $(TESTS_DIR)/e2e/ -v
 
 dev-test: ## Run tests for local development
 	@echo "$(BLUE)Running tests for local development...$(NC)"
@@ -100,53 +100,53 @@ dev-start: ## Start local development environment
 	@echo "$(BLUE)Starting local development environment...$(NC)"
 	@$(SCRIPTS_DIR)/start-dev-environment.sh
 
-dev-stop: ## Остановить локальную среду разработки
-	@echo "$(BLUE)Остановка локальной среды разработки...$(NC)"
+dev-stop: ## Stop local development environment
+	@echo "$(BLUE)Stopping local development environment...$(NC)"
 	@$(SCRIPTS_DIR)/stop-dev-environment.sh
 
-dev-restart: ## Перезапустить локальную среду разработки
-	@echo "$(BLUE)Перезапуск локальной среды разработки...$(NC)"
+dev-restart: ## Restart local development environment
+	@echo "$(BLUE)Restarting local development environment...$(NC)"
 	@make dev-stop
 	@make dev-start
 
-# Команды для мониторинга
-monitor: ## Запустить мониторинг
-	@echo "$(BLUE)Запуск мониторинга...$(NC)"
+# Monitoring commands
+monitor: ## Start monitoring
+	@echo "$(BLUE)Starting monitoring...$(NC)"
 	@$(SCRIPTS_DIR)/start-monitoring.sh
 
-monitor-stop: ## Остановить мониторинг
-	@echo "$(BLUE)Остановка мониторинга...$(NC)"
+monitor-stop: ## Stop monitoring
+	@echo "$(BLUE)Stopping monitoring...$(NC)"
 	@$(SCRIPTS_DIR)/stop-monitoring.sh
 
-# Команды для тестирования производительности
-benchmark: ## Запустить тесты производительности
-	@echo "$(BLUE)Запуск тестов производительности...$(NC)"
+# Performance testing commands
+benchmark: ## Run performance tests
+	@echo "$(BLUE)Running performance tests...$(NC)"
 	@$(SCRIPTS_DIR)/run-benchmarks.sh
 
-# Команды для безопасности
-security-scan: ## Сканирование безопасности
-	@echo "$(BLUE)Сканирование безопасности...$(NC)"
+# Security commands
+security-scan: ## Security scanning
+	@echo "$(BLUE)Running security scan...$(NC)"
 	@$(SCRIPTS_DIR)/security-scan.sh
 
-# Команды для резервного копирования
-backup: ## Создать резервную копию
-	@echo "$(BLUE)Создание резервной копии...$(NC)"
+# Backup commands
+backup: ## Create backup
+	@echo "$(BLUE)Creating backup...$(NC)"
 	@$(SCRIPTS_DIR)/backup.sh
 
-restore: ## Восстановить из резервной копии
-	@echo "$(BLUE)Восстановление из резервной копии...$(NC)"
+restore: ## Restore from backup
+	@echo "$(BLUE)Restoring from backup...$(NC)"
 	@$(SCRIPTS_DIR)/restore.sh
 
-# Команды для обновления
-update: ## Обновить систему
-	@echo "$(BLUE)Обновление системы...$(NC)"
+# Update commands
+update: ## Update system
+	@echo "$(BLUE)Updating system...$(NC)"
 	@$(SCRIPTS_DIR)/update.sh
 
-# Команды для отладки
-debug: ## Включить режим отладки
-	@echo "$(BLUE)Включение режима отладки...$(NC)"
+# Debug commands
+debug: ## Enable debug mode
+	@echo "$(BLUE)Enabling debug mode...$(NC)"
 	@$(SCRIPTS_DIR)/enable-debug.sh
 
-debug-off: ## Отключить режим отладки
-	@echo "$(BLUE)Отключение режима отладки...$(NC)"
+debug-off: ## Disable debug mode
+	@echo "$(BLUE)Disabling debug mode...$(NC)"
 	@$(SCRIPTS_DIR)/disable-debug.sh 
